@@ -4,3 +4,7 @@ This is a Windows PowerShell script designed to achieve the following:
 * Give logged-in users ample time to log off before enforcing a reboot
 * Provide logging and alerting of when reboots occur or are delayed
 * Change the behavior of the script on a per-server basis using Personality Strings
+
+Requirements:
+* Windows PowerShell
+* Citrix XenApp PowerShell SDK

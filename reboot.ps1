@@ -1,7 +1,7 @@
 ###############################################################################
 # Reboot Script for Citrix Provisioned XenApp Servers
 # Created 5-5-2011 by Ben Piper
-# Modified 3-30-2012
+# Modified 5-7-2013
 #
 #            This script must be executed under an account
 #                 with full Administrative privileges
@@ -16,52 +16,50 @@
 #	1 and 2 are configurable and can be turned off.  3 is not configurable
 #	and cannot be turned off via the script settings.
 ###############################################################################
-# Settings
-###############################################################################
-$aggression = -1 											# Number of seconds between checks and notifications for logged-in users (Set to -1 for auto)
-$annoyUser = 3												# Maximum number of times to broadcast warning message to users
-$defaultRebootEmail = 0										# Default setting for controlling email alerts
-$defaultRebootLogging = 1									# Default setting for controlling logging
-$forcedRebootS = "Forced server reboot initiated"			# Subject line for email notification when forced reboot is initiated
-$forcedRebootB = "Rebooting due to forced schedule"			# Body for email notification when forced reboot is initiated (Also doubles as text for logging)
-$loggedinS = "Reboot Delayed"								# Subject line for email notification when users are logged in
-$loggedinB = "Users are logged in. Reboot delayed for "		# Body for email notification when users are logged in (Also doubles as text for logging)
-$logfilepath = "\\server\c$\logs"							# Base location for logfiles (no trailing backslash)
-$minRebootDelayMins = 120									# Minimum number of minutes before a forced reboot
-$maxRebootDelayMins = 180									# Maximum number of minutes before a forced reboot
-$maxRandomRebootDelaySecs = 180								# Maximum number of seconds to wait before a reboot with no users logged in (for staggering)
-$messageTitle = "Alert"										# Title of pop-up message box
-$notifyDelay = 60											# Minimum number of minutes that must elapse before warning notifications begin
-$personalityStringEmail = "Reboot_Email="					# Provisioning Services Personality String to control email alerts (0 or 1)
-$personalityStringLog = "Reboot_Logging="					# Provisioning Services Personality String to control logging (0 or 1)
-$personalityStringWaitOverride = "Wait_Override="			# Provisioning Services Personality String to override waiting for users to logoff (0 or 1)
-$personalityStringRebootBypass = "Reboot_Bypass="			# Provisioning Services Personality String to bypass reboot (0 or 1)
-$rebootS = "Server reboot initiated"						# Subject line for email notification when reboot is initiated
-$rebootB = "Rebooting due to attrition"						# Body for email notification when reboot is initiated (Also doubles as text for logging)
-$shutdownTimer = 30											# Number of seconds before system reboots after reboot is initated
-$smtpServer = "10.1.10.10"									# SMTP server for email notifications
-$smtpDomain = "benpiper.com"								# MAIL FROM domain for SMTP alerts
-$smtpAlerts = "alert@benpiper.com"							# Email address(es, comma separated) to send SMTP alerts to
-$Global:NoLogonLoadEvaluator = "Disabled"					# Name of the load evaluator used to prevent logons
-
-###############################################################################
 # Initialization and sanity checks
 ###############################################################################
-$rebootBypass = get-content C:\Personality.ini | Select-String -Pattern "$personalityStringRebootBypass" | foreach-object {$_ -replace $personalitystringrebootbypass, ""}	# Retrieve value from personality string
+
+# Specify the full path to the script containing the configuration variables (see README.md for help)
+$configFile = "./reboot-config.ps1"
+
+# Check for the configuration file
+
+If ((Test-Path -path $configFile) -eq $True) {
+	. $configFile
+	}
+else {
+	Write-Host Configuration file $configFile not found. Exiting...
+	break
+	}
+
+# Abort reboot if the personality string for rebootBypass is set to 0
+$rebootBypass = get-content C:\Personality.ini | Select-String -Pattern "$personalityStringRebootBypass" | foreach-object {$_ -replace $personalitystringrebootbypass, ""}
 if ($rebootBypass -ne 0) { exit }
+
+Add-PSSnapin "Citrix.XenApp.Commands"
+
 $Global:EventLog = New-Object -type System.Diagnostics.Eventlog -argumentlist Application # Creates a global object for logging to the Application event log
-$Global:EventLog.Source = "Provisioned Server Reboot" 	# All event logs will be entered with this as the source
+$Global:EventLog.Source = "$eventLogSource"
 $processes=0
 $powershells = @(get-process | Where {$_.ProcessName -eq "powershell"}) # Query all running processes to see if Powershell is running
 foreach ($p in $powershells) {$processes+=1} 							# Validate that there is already a powershell instance running
 if ($processes -gt 1) {$EventLog.WriteEntry("PowerShell is already running.  Terminating this instance.","Information","011");exit}
-$EventLog.WriteEntry("Starting scheduled reboot task.","Information","111")	# Create event entry to note the start time of the script
+
+# Create event entry to note the start time of the script
+$EventLog.WriteEntry("Starting scheduled reboot task.","Information","111")
 if ($annoyUser -lt 1) {$annoyUser = 3}
-Add-PSSnapin "Citrix.XenApp.Commands"
+
+# Randomize reboot delay
 $rebootDelay = get-random -min $minRebootDelayMins -max $maxRebootDelayMins
-while ($aggression -gt $rebootDelay*60) {$aggression = $aggression/$annoyUser}	# If aggression timer is set and exceeds the rebootDelay, pare it down
-while ($aggression -lt 0) {$aggression = (($maxRebootDelayMins+$notifyDelay)/$notifyDelay)*60}	# If aggression timer is set to auto, make it reasonable
-if ($rebootDelay -lt $notifyDelay) {$rebootDelay = $notifyDelay * 2}	# If reboot delay is less than notification delay, increase reboot delay to twice the notification delay
+
+# If aggression timer is set and exceeds the rebootDelay, pare it down
+while ($aggression -gt $rebootDelay*60) {$aggression = $aggression/$annoyUser}
+
+# If aggression timer is set to auto, make it reasonable
+while ($aggression -lt 0) {$aggression = (($maxRebootDelayMins+$notifyDelay)/$notifyDelay)*60}
+
+# If reboot delay is less than notification delay, increase reboot delay to twice the notification delay
+if ($rebootDelay -lt $notifyDelay) {$rebootDelay = $notifyDelay * 2}
 $Global:NoUsers = $False 					# Create a global variable for assessing active sessions
 [string]$Global:ServerLoadEvaluator 		# Create a global load evaluator placeholder to be used for re-assigning the server's LE
 $rebootEmail = get-content C:\Personality.ini | Select-String -Pattern "$personalityStringEmail" | foreach-object {$_ -replace $personalitystringemail, ""}	# Retrieve value from personality string

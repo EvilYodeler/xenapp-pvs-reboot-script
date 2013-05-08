@@ -1,28 +1,32 @@
 # Sample configuration file
+# Modify the variables, save this file as reboot-config.ps1, and place in the same path as the main script.
 
-$aggression = -1 											# Number of seconds between checks and notifications for logged-in users (Set to -1 for auto)
-$annoyUser = 3												# Maximum number of times to broadcast warning message to users
-$defaultRebootEmail = 0										# Default setting for controlling email alerts
-$defaultRebootLogging = 1									# Default setting for controlling logging
-$forcedRebootS = "Forced server reboot initiated"			# Subject line for email notification when forced reboot is initiated
-$forcedRebootB = "Rebooting due to forced schedule"			# Body for email notification when forced reboot is initiated (Also doubles as text for logging)
-$loggedinS = "Reboot Delayed"								# Subject line for email notification when users are logged in
-$loggedinB = "Users are logged in. Reboot delayed for "		# Body for email notification when users are logged in (Also doubles as text for logging)
-$logfilepath = "\\server\c$\logs"							# Base location for logfiles (no trailing backslash)
+$aggression = -1 											# Interval in seconds for notifying logged-in users of a pending reboot (Set to -1 for auto)
+$annoyUser = 3												# Maximum number of times to notify logged-in users of a pending reboot
 $minRebootDelayMins = 120									# Minimum number of minutes before a forced reboot
 $maxRebootDelayMins = 180									# Maximum number of minutes before a forced reboot
-$maxRandomRebootDelaySecs = 180								# Maximum number of seconds to wait before a reboot with no users logged in (for staggering)
-$messageTitle = "Alert"										# Title of pop-up message box
+$maxRandomRebootDelaySecs = 180								# Maximum number of seconds to wait before a reboot with no users logged in (for staggering reboots and preventing boot storms)
+$messageTitle = "Alert"										# Title of pop-up message box displayed to logged-in users
 $notifyDelay = 60											# Minimum number of minutes that must elapse before warning notifications begin
+$shutdownTimer = 30											# Number of seconds before system reboots after reboot is initated
+
 $personalityStringEmail = "Reboot_Email="					# Provisioning Services Personality String to control email alerts (0 or 1)
 $personalityStringLog = "Reboot_Logging="					# Provisioning Services Personality String to control logging (0 or 1)
 $personalityStringWaitOverride = "Wait_Override="			# Provisioning Services Personality String to override waiting for users to logoff (0 or 1)
 $personalityStringRebootBypass = "Reboot_Bypass="			# Provisioning Services Personality String to bypass reboot (0 or 1)
+$defaultRebootEmail = 0										# Default setting for controlling email alerts if Personality String is not present
+$defaultRebootLogging = 1									# Default setting for controlling logging if Personality String is not present
+
+$forcedRebootS = "Forced server reboot initiated"			# Subject line for email notification when forced reboot is initiated
+$forcedRebootB = "Rebooting due to forced schedule"			# Body for email notification when forced reboot is initiated (Also doubles as text for logging)
 $rebootS = "Server reboot initiated"						# Subject line for email notification when reboot is initiated
 $rebootB = "Rebooting due to attrition"						# Body for email notification when reboot is initiated (Also doubles as text for logging)
-$shutdownTimer = 30											# Number of seconds before system reboots after reboot is initated
+$loggedinS = "Reboot Delayed"								# Subject line for email notification when users are logged in
+$loggedinB = "Users are logged in. Reboot delayed for "		# Body for email notification when users are logged in (Also doubles as text for logging). Followed by "# minutes"
+$logfilepath = "\\server\c$\logs"							# Base location for text logfiles (no trailing backslash)
+
 $smtpServer = "10.1.10.10"									# SMTP server for email notifications
-$smtpDomain = "benpiper.com"								# MAIL FROM domain for SMTP alerts
-$smtpAlerts = "alert@benpiper.com"							# Email address(es, comma separated) to send SMTP alerts to
+$smtpDomain = "benpiper.com"								# MAIL FROM domain for SMTP alerts. The server name will be placed before the @.
+$smtpAlerts = "alert@benpiper.com"							# Email address(es, comma separated,) to send SMTP alerts to
 $eventLogSource = "Provisioned Server Reboot"				# All event logs will be entered with this as the source
-$Global:NoLogonLoadEvaluator = "Disabled"					# Name of the load evaluator used to prevent logons
+$Global:NoLogonLoadEvaluator = "Disabled"					# Name of the XenApp load evaluator used to prevent logons

@@ -1,21 +1,11 @@
 ###############################################################################
 # Reboot Script for Citrix Provisioned XenApp Servers
-# Created 5-5-2011 by Ben Piper
-# Modified 5-7-2013
+# Created 5-5-2011 by Ben Piper (ben@benpiper.com / www.benpiper.com)
 #
 #            This script must be executed under an account
 #                 with full Administrative privileges
 #
 ############################################################################### 
-# Comments
-# 	This script utilizes three primary output methods:
-#	1. Email
-#	2. Logging to file
-#	3. Logging to Windows Application Log
-#	
-#	1 and 2 are configurable and can be turned off.  3 is not configurable
-#	and cannot be turned off via the script settings.
-###############################################################################
 # Initialization and sanity checks
 ###############################################################################
 

@@ -1,6 +1,7 @@
 # Sample configuration file
-# Modify the variables, save this file as reboot-config.ps1, and place in the same path as the main script.
+# Modify the variables and save this file as reboot-config.ps1.
 
+# Script behavior
 $aggression = -1 											# Interval in seconds for notifying logged-in users of a pending reboot (Set to -1 for auto)
 $annoyUser = 3												# Maximum number of times to notify logged-in users of a pending reboot
 $minRebootDelayMins = 120									# Minimum number of minutes before a forced reboot
@@ -10,6 +11,7 @@ $messageTitle = "Alert"										# Title of pop-up message box displayed to logg
 $notifyDelay = 60											# Minimum number of minutes that must elapse before warning notifications begin
 $shutdownTimer = 30											# Number of seconds before system reboots after reboot is initated
 
+# Provisioning Services Personality String Settings
 $personalityStringEmail = "Reboot_Email="					# Provisioning Services Personality String to control email alerts (0 or 1)
 $personalityStringLog = "Reboot_Logging="					# Provisioning Services Personality String to control logging (0 or 1)
 $personalityStringWaitOverride = "Wait_Override="			# Provisioning Services Personality String to override waiting for users to logoff (0 or 1)
@@ -17,6 +19,7 @@ $personalityStringRebootBypass = "Reboot_Bypass="			# Provisioning Services Pers
 $defaultRebootEmail = 0										# Default setting for controlling email alerts if Personality String is not present
 $defaultRebootLogging = 1									# Default setting for controlling logging if Personality String is not present
 
+# Message Customization
 $forcedRebootS = "Forced server reboot initiated"			# Subject line for email notification when forced reboot is initiated
 $forcedRebootB = "Rebooting due to forced schedule"			# Body for email notification when forced reboot is initiated (Also doubles as text for logging)
 $rebootS = "Server reboot initiated"						# Subject line for email notification when reboot is initiated
@@ -25,6 +28,7 @@ $loggedinS = "Reboot Delayed"								# Subject line for email notification when 
 $loggedinB = "Users are logged in. Reboot delayed for "		# Body for email notification when users are logged in (Also doubles as text for logging). Followed by "# minutes"
 $logfilepath = "\\server\c$\logs"							# Base location for text logfiles (no trailing backslash)
 
+# Notification settings
 $smtpServer = "10.1.10.10"									# SMTP server for email notifications
 $smtpDomain = "benpiper.com"								# MAIL FROM domain for SMTP alerts. The server name will be placed before the @.
 $smtpAlerts = "alert@benpiper.com"							# Email address(es, comma separated,) to send SMTP alerts to
